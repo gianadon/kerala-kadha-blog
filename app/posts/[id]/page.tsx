@@ -9,10 +9,8 @@ type Post = {
   content: string;
 };
 
-// This function fetches the data for a single post
 async function getPostById(id: string): Promise<Post> {
-  // The fetch URL below is now corrected
-  const res = await fetch(`https://6893179cc49d24bce8696456.mockapi.io/posts`, {
+  const res = await fetch(`https://6893179cc49d24bce8696456.mockapi.io/posts/${id}`, {
     cache: 'no-store',
   });
 
@@ -23,8 +21,12 @@ async function getPostById(id: string): Promise<Post> {
   return res.json();
 }
 
-// This special Next.js function generates metadata for the page (good for SEO)
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+// This is the prop type definition that fixes the error
+type PageProps = {
+  params: { id: string };
+};
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const post = await getPostById(params.id);
   return {
     title: `${post.title} | Kerala Katha`,
@@ -32,8 +34,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-// This is the main component for the page
-export default async function PostPage({ params }: { params: { id: string } }) {
+export default async function PostPage({ params }: PageProps) {
   const post = await getPostById(params.id);
   const creationDate = new Date(post.createdAt).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -43,7 +44,6 @@ export default async function PostPage({ params }: { params: { id: string } }) {
 
   return (
     <article className="container mx-auto px-4 py-12 max-w-4xl">
-      {/* Post Header */}
       <header className="mb-8">
         <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 mb-3">
           {post.title}
@@ -53,14 +53,12 @@ export default async function PostPage({ params }: { params: { id: string } }) {
         </p>
       </header>
       
-      {/* Cover Image */}
       <img 
         src={post.coverImage} 
         alt={post.title} 
         className="w-full h-auto max-h-[500px] object-cover rounded-lg shadow-lg mb-8"
       />
 
-      {/* Post Content */}
       <div className="text-lg text-gray-800 leading-relaxed whitespace-pre-line">
         {post.content}
       </div>
